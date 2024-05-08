@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Telegram Referral App</title>
+</head>
+<body>
+  <h1>Moje Skierowania</h1>
+  <input type="text" id="userIdInput" placeholder="Wpisz swój Telegram ID">
+  <button onclick="fetchReferrals()">Pokaż moje referencje</button>
+  <div id="referralsList"></div>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  // Funkcja pobierająca ID użytkownika z danych Telegram WebApp
+  function fetchReferrals() {
+    // Przetwórz dane z `Telegram.WebApp.initData`
+    const tgData = Telegram.WebApp.initDataUnsafe;
+
+    // Wyślij zapytanie POST z danymi użytkownika do serwera
+    fetch(`http://localhost:3000/api/myreferrals`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tgData })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const list = data.referrals.map(ref => `<li>${ref.username}</li>`).join('');
+      document.getElementById('referralsList').innerHTML = `<ul>${list}</ul>`;
+    })
+    .catch(error => {
+      console.error('Failed to fetch referrals:', error);
+      document.getElementById('referralsList').innerText = 'Nie udało się pobrać skierowań.';
+    });
+  }
+
+  // Wywołaj automatycznie po załadowaniu strony
+  fetchReferrals();
+</script>
+
+</body>
+</html>
